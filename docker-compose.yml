@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  ocr-engine:
+    container_name: ocr-engine-endpoint
+    image: image_paddle
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /data/ocr/source-code/ocr-engine/file_saved:/app/file_saved
+      - ./ocrv4:/root/.paddleocr/whl/rec/en/en_PP-OCRv4_rec_infer
+      - ./ocrv3:/root/.paddleocr/whl/det/en/en_PP-OCRv3_det_infer
+      - ./ppocr:/root/.paddleocr/whl/cls/ch_ppocr_mobile_v2.0_cls_infer
+
+    ports:
+      - "8084:8080"
+    environment:
+      - ENV=development
+      - PYTHONPATH=/app
+    command: >
+      sh -c "
+        pip3 install aio-pika && \
+        pip3 install albumentations && \
+        uvicorn app.main:app --host 0.0.0.0 --port 8080 --log-config log_config.json"
+
+  log-watcher:
+    container_name: ocr-endpoint-logger
+    image: docker:cli
+    volumes:
+      - .:/app
+      - ./log_ocr_engine.sh:/log_ocr_engine.sh
+      - ./docker_request.log:/docker_request.log
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: sh /log_ocr_engine.sh
+    depends_on:
+      - ocr-engine

@@ -1,0 +1,22 @@
+- truy cập container mongodb:
+-> docker exec -it mongodb bash
+
+- truy cập database:
+-> mongosh -u admin -p admin
+
+- tạo mới database:
+-> use ocr-sytem
+
+- tạo user:
+-> db.createUser({
+  user: "ocr",
+  pwd: "ocr",
+  roles: [
+    { role: "dbAdmin", db: "ocr-system" },
+    { role: "dbOwner", db: "ocr-system" },
+    { role: "read", db: "ocr-system" },
+    { role: "readWrite", db: "ocr-system" },
+    { role: "userAdmin", db: "ocr-system" },
+    { role: "enableSharding", db: "ocr-system" }
+  ]
+})
