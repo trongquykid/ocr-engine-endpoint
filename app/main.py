@@ -38,7 +38,7 @@ origins = [
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    app.state.db = app.database
+    # app.state.db = app.database
 
     app.state.models = load_models()
     # consumer_task = asyncio.create_task(kafka_consumer.consume_messages(app.state.db))
