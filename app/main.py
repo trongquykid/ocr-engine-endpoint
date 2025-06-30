@@ -14,7 +14,7 @@ from app.services.ocr_text.surya.layout import LayoutPredictor
 from app.services.ocr_text.surya.table_rec import TableRecPredictor
 from app.api.api_router import router
 from app.common.config import settings
-from app.db.base import init_db
+
 from app.helpers.exception_handler import (
     BaseHTTPException,
     CustomException,
@@ -24,9 +24,7 @@ from app.helpers.exception_handler import (
     http_exception_handler,
 )
 import os
-from aio_pika import connect_robust
 import logging
-from app.helpers import rab_helper
 
 connection = None
 logger = logging.getLogger("__name__")
@@ -37,40 +35,15 @@ origins = [
     "http://localhost:8080"
 ]
 
-async def process_rabbit(db, det_predictor, rec_predictor, layout_predictor, table_rec_predictor):
-    global connection
-
-    channel = await connection.channel()
-
-    await channel.set_qos(prefetch_count=1)
-
-    queue_document = await channel.get_queue(name=settings.RABBITMQ_QUEUE_NAME_RECOGNIZE)
-
-    # await queue_document.consume(functools.partial(rab_consumer.process_message, channel=channel, db=db, det_predictor=det_predictor, rec_predictor=rec_predictor, layout_predictor=layout_predictor, table_rec_predictor=table_rec_predictor))
-    print("RabbitMQ connection established and queue declared success.")
-
-    # await connection.close()
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global connection
-    await init_db(app)
 
     app.state.db = app.database
 
     app.state.models = load_models()
     # consumer_task = asyncio.create_task(kafka_consumer.consume_messages(app.state.db))
 
-    loop = asyncio.get_event_loop()
-    connection = await connect_robust(
-            url=f"{settings.RABBITMQ_URL}/?heartbeat=6000",
-            loop=loop,
-            reconnect_interval="0.1"
-        )
-    loop.create_task(process_rabbit(app.state.db, app.state.models['det'], app.state.models['rec'], app.state.models['layout'], app.state.models['table']))
-
     yield
-    await connection.close()
     app.client.close()
 
 
