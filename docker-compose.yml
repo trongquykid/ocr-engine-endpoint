@@ -3,7 +3,7 @@ version: '3.8'
 services:
   ocr-engine:
     container_name: ocr-engine-endpoint
-    image: image_paddle
+    image: ocr-system:latest
     deploy:
       resources:
         reservations:
@@ -26,12 +26,13 @@ services:
     environment:
       - ENV=development
       - PYTHONPATH=/app
+    
     command: >
       sh -c "
         pip3 install aio-pika && \
         pip3 install albumentations && \
         uvicorn app.main:app --host 0.0.0.0 --port 8080 --log-config log_config.json"
-
+  
   log-watcher:
     container_name: ocr-endpoint-logger
     image: docker:cli

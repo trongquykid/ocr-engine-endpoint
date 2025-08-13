@@ -1,6 +1,5 @@
 from collections import defaultdict
 import copy, os
-from app.services.ocr_text.surya.debug.draw import draw_bboxes_on_image
 
 from app.services.ocr_text.process_data import offset_table_bboxes
 from app.services.ocr_text.surya.common.util import rescale_bbox, expand_bbox
@@ -96,16 +95,6 @@ def table_recognition(images, names, highres_images, requestCode, layout_predict
 
             out_pred = offset_table_bboxes(out_pred, offset)
 
-            offset_rows = [offset_bbox(b, offset) for b in rows]
-            offset_cols = [offset_bbox(b, offset) for b in cols]
-            offset_cells = [offset_bbox(b, offset) for b in cells]
-
-            # === Vẽ trên ảnh gốc ===
-            orig_highres_image = copy.deepcopy(highres_images[img_idx])
-
-            rc_image = draw_bboxes_on_image(bboxes=offset_rows, image=orig_highres_image, labels=row_labels, label_font_size=20, color="blue")
-            rc_image = draw_bboxes_on_image(bboxes=offset_cols, image=rc_image, labels=col_labels, label_font_size=20, color="red")
-            # rc_image.save(os.path.join("./file_saved", f"{orig_name}_page{pnum + 1}_table{table_idx}_rc_on_orig.png"))
 
         table_predictions[orig_name].append(out_pred)
     # table_minio = save_image_api(f"ocr/kondor/{requestCode}", rc_image, f"{orig_name}_page{pnum + 1}_table{table_idx}_rc_on_orig.png")
