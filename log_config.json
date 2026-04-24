@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "formatters": {
+    "custom": {
+      "()": "app.custom_logger.TimeFormatter",
+      "format": "%(levelname)-10.10s %(asctime)s [%(name)s][%(module)s:%(lineno)d] - %(message)s",
+      "datefmt": "%Y-%m-%dT%H:%M:%S.%f%z"
+    }
+  },
+  "handlers": {
+    "logconsole": {
+      "class": "logging.StreamHandler",
+      "formatter": "custom",
+      "level": "DEBUG",
+      "stream": "ext://sys.stdout"
+    }
+  },
+  "loggers": {
+    "root": {
+      "level": "INFO",
+      "handlers": ["logconsole"]
+    },
+    "httpx": {
+      "level": "WARNING",
+      "handlers": ["logconsole"]
+    }
+  }
+}
